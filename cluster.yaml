@@ -1,0 +1,54 @@
+cluster_name: koble-cluster
+
+max_workers: 3
+
+docker:
+  #  image: "rayproject/ray-ml:38be05-py310"
+  image: "ludwigai/ludwig-ray:latest"
+  container_name: "ray_container"
+
+provider:
+  type: aws
+  region: eu-west-2
+  availability_zone: eu-west-2a
+  security_group:
+    GroupName: ray_client_security_group
+    IpPermissions:
+      - FromPort: 0
+        ToPort: 65535
+        IpProtocol: TCP
+        IpRanges:
+          # This will enable inbound access from ALL IPv4 addresses.
+          - CidrIp: 0.0.0.0/0
+
+auth:
+  ssh_user: ubuntu
+
+available_node_types:
+  # Configurations for the head node.
+  head:
+    node_config:
+      InstanceType: m5.large
+      ImageId: latest_dlami
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 1000
+
+  # Configurations for the worker nodes.
+  worker:
+    min_workers: 1
+    max_workers: 3
+    node_config:
+      InstanceType: m5.large
+      ImageId: latest_dlami
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 1000
+
+head_node_type: head
+
+#setup_commands:
+#  - pwd
+#  - pip install "ludwig==0.7.2"
